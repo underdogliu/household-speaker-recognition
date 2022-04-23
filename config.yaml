@@ -1,0 +1,6 @@
+
+seed: 0
+embeddings_path: "/home/alexey/Documents/python/household/embeddings"
+protocol_path: "protocols"
+
+

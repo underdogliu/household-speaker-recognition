@@ -1,0 +1,30 @@
+
+
+embeddings_name: "speechbrain" # ['clova', 'speechbrain', 'xvector']
+embeddings_type: "trimmed_2sec"
+len_norm: true
+
+
+score_type: 'plda_sph' # ['cos_emb_avg', 'cos_sc_avg', 'plda_sph', 'plda_diag']
+by_the_book: true # plda scoring
+preprocessing_name: ""
+recognizer: 'memory_offline'
+#sequential_updates: false
+
+
+frr_point: 1
+
+calibrate_scores: true
+calibration_params_path: ""
+
+
+threshold_min: -10
+threshold_max: 20
+thresholds_num: 15
+
+params:
+    algorithm: 
+        #- "kmeans" # 0, 15
+        #- "vb_plda_sph" # -5, 20
+        - "ahc_plda_sph" # 200 - 260, score_type must be 'plda_sph' to learn suitable calibration parameters
+

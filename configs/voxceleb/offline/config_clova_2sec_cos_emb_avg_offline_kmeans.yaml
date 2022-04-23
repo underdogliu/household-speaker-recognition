@@ -1,0 +1,29 @@
+
+
+embeddings_name: "clova" # ['clova', 'speechbrain', 'xvector']
+embeddings_type: "2sec"
+len_norm: true
+
+
+score_type: 'cos_emb_avg' # ['cos_emb_avg', 'cos_sc_avg', 'plda_sph', 'plda_diag']
+by_the_book: true # plda scoring
+preprocessing_name: ""
+recognizer: 'memory_offline'
+#sequential_updates: false
+
+
+frr_point: 1
+
+calibrate_scores: true
+calibration_params_path: ""
+
+
+threshold_min: 0
+threshold_max: 12
+thresholds_num: 13
+
+params:
+    algorithm: 
+        - "kmeans"
+
+

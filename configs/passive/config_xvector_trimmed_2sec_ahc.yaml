@@ -1,0 +1,26 @@
+
+enrollment_type: "passive"
+
+embeddings_name: "xvector" # ['clova', 'speechbrain', 'xvector']
+embeddings_type: "trimmed_2sec"
+len_norm: false # false for xvector
+
+
+score_type: 'plda_diag' # ['cos_emb_avg', 'cos_sc_avg', 'plda_sph', 'plda_diag']
+by_the_book: false # plda scoring
+preprocessing_name: "xvector"
+recognizer: 'memory_unsupervised' 
+#sequential_updates: true
+
+frr_point: 1
+
+calibrate_scores: true
+calibration_params_path: ""
+
+
+threshold_min: -10
+threshold_max: 20
+thresholds_num: 31
+params:
+    algorithm: 
+        - "ahc" 
