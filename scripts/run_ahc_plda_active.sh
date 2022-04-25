@@ -6,10 +6,10 @@ VERBOSE=0
 # OFFLINE
 # AHC-PLDA
 
-python household_simulation.py --config configs/offline/config_speechbrain_trimmed_2sec_cos_emb_avg_offline_ahc_plda_sph.yaml --debug $DEBUG --verbose $VERBOSE
-python household_simulation.py --config configs/offline/config_clova_2sec_cos_emb_avg_offline_ahc_plda_sph.yaml --debug $DEBUG --verbose $VERBOSE
-python household_simulation.py --config configs/offline/config_xvector_trimmed_2sec_plda_diag_offline_ahc_plda_sph.yaml --debug $DEBUG --verbose $VERBOSE
-
+#python household_simulation.py --config configs/offline/config_speechbrain_trimmed_2sec_cos_emb_avg_offline_ahc_plda_sph.yaml --debug $DEBUG --verbose $VERBOSE
+#python household_simulation.py --config configs/offline/config_clova_2sec_cos_emb_avg_offline_ahc_plda_sph.yaml --debug $DEBUG --verbose $VERBOSE
+#python household_simulation.py --config configs/offline/config_xvector_trimmed_2sec_plda_diag_offline_ahc_plda_sph.yaml --debug $DEBUG --verbose $VERBOSE
+python3 household_simulation_mod.py --config configs/offline/config_speechbrain_trimmed_2sec_cos_emb_avg_offline_ahc_plda_sph.yaml --debug $DEBUG --verbose $VERBOSE
 
 #cmd1="python household_simulation.py --config configs/offline/config_speechbrain_trimmed_2sec_cos_emb_avg_offline_ahc_plda_sph.yaml --debug ${DEBUG} --verbose ${VERBOSE}"
 #cmd2="python household_simulation.py --config configs/offline/config_clova_2sec_cos_emb_avg_offline_ahc_plda_sph.yaml --debug ${DEBUG} --verbose ${VERBOSE}"

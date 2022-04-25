@@ -120,7 +120,7 @@ def load_embeddings(config_common, config, protocol_name="proto_v5b", device="cp
     return X, y, utts_train, utt2emb
 
 
-def plda_train_infer(config, utts_train, device="cpu"):
+def plda_train_infer(config, X, y, utts_train, device="cpu"):
     """_summary_
 
     Args:
@@ -283,7 +283,6 @@ def active_enrollment(
     protocol_path,
     utt2emb,
     similarity_score,
-    results_dir,
     subset_adapt=False,
     n_enrolls=777,
     protocol_name="proto_v5b",
@@ -489,7 +488,6 @@ def passive_enrollment(
     protocol_path,
     utt2emb,
     similarity_score,
-    results_dir,
     subset_adapt=False,
     n_enrolls=777,
     protocol_name="proto_v5b",
@@ -640,18 +638,19 @@ def main(args):
 
     # initialize back-end parameters, train the PLDA and do the scoring
     similarity_score, backend_params = plda_train_infer(
-        config, utts_train, device=device
+        config, X, y, utts_train, device=device
     )
 
     # additionally, load threshold into the parameters
-    backend_params = load_threshold(backend_params)
+    backend_params = load_threshold(config, backend_params)
 
     # load trials and convert parameters
     backend_params_list, simulation_ids = load_trials_convert_params(
         backend_params, protocol_name=protocol_name, household_size=args.household_size
     )
 
-    enrollment_type = "active" if args.active else "passive"
+    #enrollment_type = "active" if args.active else "passive"
+    enrollment_type = config["enrollment_type"]
     enrollment_func = (
         active_enrollment if enrollment_type == "active" else passive_enrollment
     )

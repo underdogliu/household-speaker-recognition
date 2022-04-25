@@ -1,4 +1,5 @@
 
+enrollment_type: "active"
 
 embeddings_name: "speechbrain" # ['clova', 'speechbrain', 'xvector']
 embeddings_type: "trimmed_2sec"

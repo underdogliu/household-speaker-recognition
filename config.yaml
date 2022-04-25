@@ -1,6 +1,7 @@
 
 seed: 0
-embeddings_path: "/home/alexey/Documents/python/household/embeddings"
+#embeddings_path: "/home/alexey/Documents/python/household/embeddings"
+embeddings_path: "/media/ssd3/xuechen/subsets_adaptation/data/embeddings"
 protocol_path: "protocols"
 
 
