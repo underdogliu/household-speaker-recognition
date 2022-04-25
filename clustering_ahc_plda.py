@@ -1,9 +1,8 @@
+from collections import defaultdict
+
 import numpy as np
 from scipy.special import gammaln, psi
 from numpy.random import choice
-from scipy.special import expit as sigmoid
-from scipy.special import logit
-from scipy.optimize import minimize, minimize_scalar
 
 
 class CRP:
@@ -137,7 +136,7 @@ class SingletonDict(dict):
         return super().__getitem__(key) if key in self else {key}
 
 
-class OriginalAgglomerativeClusteringPLDA:
+class OriginalAgglomerativeClusteringPLDA(object):
     def __init__(self, X, w_inv, alpha, beta, B=None):
         if B is not None:
             assert X.shape == B.shape
@@ -152,7 +151,7 @@ class OriginalAgglomerativeClusteringPLDA:
             self.R = R = (w_inv * B) / (w_inv + B)
         self.RX = RX = R * X  # (n,d)
 
-        self.LLH = (RX ** 2 / (1.0 + R) - np.log1p(R)).sum(axis=1) / 2.0  # (n,)
+        self.LLH = (RX**2 / (1.0 + R) - np.log1p(R)).sum(axis=1) / 2.0  # (n,)
         self.LLRs = []
 
         labels = np.arange(n, dtype=int)  # full length labels, contains result
@@ -182,7 +181,7 @@ class OriginalAgglomerativeClusteringPLDA:
             rR = r + R[i + 1 :, :]  # (n-i-1, d)
             rx = RX[i, :]
             rxRX = rx + RX[i + 1 :, :]
-            llh = (rxRX ** 2 / (1.0 + rR) - np.log1p(rR)).sum(axis=1) / 2.0
+            llh = (rxRX**2 / (1.0 + rR) - np.log1p(rR)).sum(axis=1) / 2.0
             score = llh + prior_ahc.llr_joins(i) - LLH[i] - LLH[i + 1 :]
             # M[i,i+1:] = score
             j = score.argmax()
@@ -242,7 +241,7 @@ class OriginalAgglomerativeClusteringPLDA:
         return labels
 
 
-class AgglomerativeClusteringPLDA:
+class AgglomerativeClusteringPLDA(object):
     def __init__(self, X, w_inv, alpha=1.0, beta=0.1, X_labeled=(), labels_known=()):
         B = None
         n_samples, dim = X.shape
@@ -262,25 +261,17 @@ class AgglomerativeClusteringPLDA:
             self.R = R = (w_inv * B) / (w_inv + B)
         self.RX = RX = R * X  # (n,d)
 
-        self.LLH = (RX ** 2 / (1.0 + R) - np.log1p(R)).sum(axis=1) / 2.0  # (n,)
+        self.LLH = (RX**2 / (1.0 + R) - np.log1p(R)).sum(axis=1) / 2.0  # (n,)
         self.LLRs = []
 
         self.mask = np.ones((R.shape[0],)) > 0
 
-        # labels = np.r_[y, 1 + np.max(y) + np.arange(n, dtype=int)]  # full length labels, contains result
         labels = np.arange(self.n, dtype=int)
         self.ind = labels.copy()  #
-        # print(labels)
-
-        # print(n, N, self.n, self.LLH.shape, labels.shape, self.R.shape, self.RX.shape)
 
         self.prior_ahc = prior.ahc(labels)
 
-        # map every element to a singleton cluster containing that element
         self.clusters = SingletonDict()
-
-        from collections import defaultdict
-
         self.cannot_link = defaultdict(list)
 
         self.merge_labeled(labels_known)
@@ -306,55 +297,13 @@ class AgglomerativeClusteringPLDA:
                     idxs = np.arange(len(labels))[mask]
                     maxi = idxs[0]
                     maxj = idxs[1]
-                    # print(maxi, maxj)
-                    # print('clusters:', self.clusters)
-
                     i = maxi
                     j = maxj - (i + 1)
-
-                    # join
-                    # RX, R, n = self.RX, self.R, self.n
-                    # prior_ahc, LLH = self.prior_ahc, self.LLH
-                    # ind = self.ind
-                    #
-                    # r = R[i, :]  # (d,)
-                    # rR = r + R[i + 1:, :]  # (n-i-1, d)
-                    # rx = RX[i, :]
-                    # rxRX = rx + RX[i + 1:, :]
-                    # llh = (rxRX ** 2 / (1.0 + rR) - np.log1p(rR)).sum(axis=1) / 2.0
-                    #
-                    # scores = llh + prior_ahc.llr_joins(i) - LLH[i] - LLH[i + 1:]
-
                     scores = self.scores_llr_joins(i)
-
                     maxval = scores[j]
-
-                    # ii, jj = ind[maxi], ind[maxj]
-                    #
-                    # self.join(ii, jj)
-                    #
-                    # RX[maxi, :] += RX[maxj, :]
-                    # R[maxi, :] += R[maxj, :]
-                    # self.RX = np.delete(RX, maxj, axis=0)
-                    # self.R = np.delete(R, maxj, axis=0)
-                    #
-                    # self.n = n - 1
-                    #
-                    # prior_ahc.join(maxi, maxj)
-                    #
-                    # LLH[maxi] = maxval + LLH[maxi] + LLH[maxj]
-                    # self.LLH = np.delete(LLH, maxj)
-                    # self.ind = np.delete(ind, maxj)
-
                     labels = np.delete(labels, maxj)
-
                     self.update(maxval, maxi, maxj)
-
                     break
-
-                    # print(self.RX.shape, self.R.shape, self.LLH.shape, self.ind.shape)
-
-        # print('clusters:', self.clusters)
 
         idxs = np.arange(len(labels_known), dtype=int)
         for c in np.unique(labels_known):
@@ -364,11 +313,9 @@ class AgglomerativeClusteringPLDA:
             for i in class_idxs:
                 for j in rest_idxs:
                     self.cannot_link[i].append(j)
-        # print(self.cannot_link)
 
     def can_join(self, i, j):
         clusters = self.clusters
-        # join = clusters[i] | clusters[j]
         allow = True
         for a in clusters[i]:
             for b in clusters[j]:
@@ -392,37 +339,22 @@ class AgglomerativeClusteringPLDA:
         rR = r + R[i + 1 :, :]  # (n-i-1, d)
         rx = RX[i, :]
         rxRX = rx + RX[i + 1 :, :]
-        llh = (rxRX ** 2 / (1.0 + rR) - np.log1p(rR)).sum(axis=1) / 2.0
+        llh = (rxRX**2 / (1.0 + rR) - np.log1p(rR)).sum(axis=1) / 2.0
         scores = llh + prior_ahc.llr_joins(i) - LLH[i] - LLH[i + 1 :]
         return scores
 
     def iteration(self, thr=0.0):
-
-        # RX, R = self.RX, self.R
-        # prior_ahc, LLH = self.prior_ahc, self.LLH
-
         n = self.n
         ind = self.ind
-
-        scores_list = [
-            -np.inf
-        ]  # scores for the upper triangle of the full score matrix
+        scores_list = [-np.inf]
         pairs = [(0, 0)]
+
         for i in range(n - 1):
-
-            # r = R[i, :]  # (d,)
-            # rR = r + R[i + 1:, :]  # (n-i-1, d)
-            # rx = RX[i, :]
-            # rxRX = rx + RX[i + 1:, :]
-            # llh = (rxRX ** 2 / (1.0 + rR) - np.log1p(rR)).sum(axis=1) / 2.0
-            # scores = llh + prior_ahc.llr_joins(i) - LLH[i] - LLH[i + 1:]
-
             scores = self.scores_llr_joins(i)
 
             scores_list += scores.tolist()
             pairs += [(i, j) for j in range(i + 1, n)]
 
-        # print(len(scores_list), scores_list[:5])
         scores = np.array(scores_list)
         pairs = np.array(pairs)
         idx_sort = np.argsort(scores)[::-1]  # largest first
@@ -437,37 +369,14 @@ class AgglomerativeClusteringPLDA:
                 LLRs.append(maxval)
 
                 if maxval > thr:
-
-                    # self.join(ii, jj)
-                    #
-                    # RX[maxi, :] += RX[maxj, :]
-                    # R[maxi, :] += R[maxj, :]
-                    # self.RX = np.delete(RX, maxj, axis=0)
-                    # self.R = np.delete(R, maxj, axis=0)
-                    #
-                    # self.n = n - 1
-                    #
-                    # prior_ahc.join(maxi, maxj)
-                    #
-                    # LLH[maxi] = maxval + LLH[maxi] + LLH[maxj]
-                    # self.LLH = np.delete(LLH, maxj)
-                    # self.ind = np.delete(ind, maxj)
-
                     self.update(maxval, maxi, maxj)
-
                 break
             else:
                 pass
-                # print("Cannot join:", ii, jj)
-                # continue
+
         return maxval
 
     def iteration_fast(self, thr=0.0):
-
-        # RX, R = self.RX, self.R
-        # LLH = self.LLH
-        # ind = self.ind
-
         prior_ahc = self.prior_ahc
 
         R, RX, LLH, ind = self.get_params()
@@ -475,29 +384,10 @@ class AgglomerativeClusteringPLDA:
         d = R.shape[1]
         n = self.n
 
-        # scores_list = []  # scores for the upper triangle of the full score matrix
-        # pairs = []
-        # for i in range(n - 1):
-        #
-        #     r = R[i, :]  # (d,)
-        #     rR = r + R[i + 1:, :]  # (n-i-1, d)
-        #     rx = RX[i, :]
-        #     rxRX = rx + RX[i + 1:, :]
-        #     llh = (rxRX ** 2 / (1.0 + rR) - np.log1p(rR)).sum(axis=1) / 2.0
-        #     scores = llh + prior_ahc.llr_joins(i) - LLH[i] - LLH[i + 1:]
-        #
-        #     scores_list += scores.tolist()
-        #     pairs += [(i, j) for j in range(i + 1, n)]
-
-        # scores_list += [-np.inf]
-        # pairs += [(0, 0)]
-        # scores = np.array(scores_list)
-        # pairs = np.array(pairs)
-
         rR_3d = R.reshape(n, 1, d) + R[1:, :].reshape(1, n - 1, d)
         rxRX_3d = RX.reshape(n, 1, d) + RX[1:, :].reshape(1, n - 1, d)
         LLH_2d = LLH.reshape(n, 1) + LLH[1:].reshape(1, n - 1)
-        llh = (rxRX_3d ** 2 / (1.0 + rR_3d) - np.log1p(rR_3d)).sum(axis=-1) / 2.0
+        llh = (rxRX_3d**2 / (1.0 + rR_3d) - np.log1p(rR_3d)).sum(axis=-1) / 2.0
 
         idx_row, idx_col = np.triu_indices(n - 1)
         idx_ravel = np.ravel_multi_index((idx_row, idx_col), dims=(n, n - 1))
@@ -521,35 +411,15 @@ class AgglomerativeClusteringPLDA:
                 LLRs.append(maxval)
 
                 if maxval > thr:
-
-                    # self.join(ii, jj)
-                    #
-                    # RX[maxi, :] += RX[maxj, :]
-                    # R[maxi, :] += R[maxj, :]
-                    # self.RX = np.delete(RX, maxj, axis=0)
-                    # self.R = np.delete(R, maxj, axis=0)
-                    #
-                    # self.n = n - 1
-                    #
-                    # prior_ahc.join(maxi, maxj)
-                    #
-                    # LLH[maxi] = maxval + LLH[maxi] + LLH[maxj]
-                    # self.LLH = np.delete(LLH, maxj)
-                    # self.ind = np.delete(ind, maxj)
-
                     self.update(maxval, maxi, maxj)
 
                 break
             else:
                 pass
-                # print("Cannot join:", ii, jj)
-                # continue
         return maxval
 
     def update(self, maxval, maxi, maxj):
-
         R, RX, LLH, ind = self.get_params()
-
         n = self.n
 
         ii, jj = ind[maxi], ind[maxj]
@@ -557,16 +427,12 @@ class AgglomerativeClusteringPLDA:
 
         RX[maxi, :] += RX[maxj, :]
         R[maxi, :] += R[maxj, :]
-        # self.RX = np.delete(RX, maxj, axis=0)
-        # self.R = np.delete(R, maxj, axis=0)
 
         self.n = n - 1
 
         self.prior_ahc.join(maxi, maxj)
 
         LLH[maxi] = maxval + LLH[maxi] + LLH[maxj]
-        # self.LLH = np.delete(LLH, maxj)
-        # self.ind = np.delete(ind, maxj)
 
         while not self.mask[maxj]:
             maxj += 1
@@ -581,8 +447,6 @@ class AgglomerativeClusteringPLDA:
             llr = self.iteration_fast(thr)
             if llr <= thr:
                 break
-            # print(self.clusters[1])
-        # return clusters2labels(self.clusters,self.N)
         return self.labelclusters()
 
     def labelclusters(self):
@@ -595,13 +459,10 @@ class AgglomerativeClusteringPLDA:
         label = first_label
         for i in range(n):
             s = clusters[i]
-            # for e in s: break  # get first set element
             e = min(s)
             if labels[e] < first_label + 1:
-                # labels[list(s)] = label
                 if e < len(self.labels_known):
                     labels[list(s)] = self.labels_known[e]
-                    # print(list(s), "<-------", self.labels_known[e])
                 else:
                     label += 1
                     labels[list(s)] = label

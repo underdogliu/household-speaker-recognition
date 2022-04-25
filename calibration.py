@@ -1,10 +1,8 @@
-import numpy as np
 import torch
 from tqdm import tqdm
 
 from sklearn.linear_model import LogisticRegression
 
-from utils import generate_trials
 import utils_io
 
 

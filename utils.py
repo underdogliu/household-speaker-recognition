@@ -17,12 +17,6 @@ class rpartial(partial):
         return self.func(*(args + self.args), **kw)
 
 
-# def concatenate_with_labels(pos, neg):
-#     n = len(pos)
-#     m = len(neg)
-#     return np.r_[pos, neg], np.r_[np.ones((n,)), np.zeros((m,))]
-
-
 def concatenate_with_labels(*arrays):
     result = np.concatenate(list(arrays))
     labels = []
@@ -139,8 +133,5 @@ def get_labels_from_trials(file_trials):
                 spk2int[spk] = i
                 i += 1
             utt2spk_id[utt] = spk2int[spk]
-
     utterances, labels = list(zip(*utt2spk_id.items()))
-    # utterances2, labels2 = get_labels_from_trials_(file_trials)
-    # utt2spk_id2 = {utt: spk for (utt, spk) in zip(utterances2, labels2)}
     return utterances, labels

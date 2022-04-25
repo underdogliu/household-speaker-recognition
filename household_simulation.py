@@ -43,7 +43,7 @@ def main(args):
     # evaluation protocol
     PROTOCOL_NAME = args.protocol
     PROTOCOL_PATH = f"protocols/{PROTOCOL_NAME}"
-    # assert PROTOCOL_NAME in ["proto_v5b", "proto_vox1a_v2", "proto_vox1b_v2"]
+    assert PROTOCOL_NAME in ["proto_v5b", "proto_vox1a_v2", "proto_vox1b_v2"]
 
     # define embedding path
     embeddings_path = config_common["embeddings_path"]
@@ -52,7 +52,7 @@ def main(args):
     embeddings_type = config["embeddings_type"]
 
     enrollment_type = config.get("enrollment_type", "active")  # ['active', 'passive']
-    # enrollment_type = "active" if args.active else "passive"
+    enrollment_type = "active" if args.active else "passive"
 
     n_enrolls = args.n_enrolls
     hh_size = args.size
@@ -70,7 +70,7 @@ def main(args):
 
     recognizer = config["recognizer"]
     assert recognizer in _recognizers
-    # sequential_updates = config["sequential_updates"]
+    sequential_updates = config["sequential_updates"]
 
     frr_point = config["frr_point"]
 
@@ -491,9 +491,6 @@ def main(args):
                                 "{0} {1} {2}\n".format(score, label_true, label_pred)
                             )
 
-                    # data = utils_io.read_lines_file(file_results)
-                    # scores, labels_true, labels_pred = list(zip(*data))
-
                 labels_pred_threshold = []
                 for (score, label) in zip(scores, labels_pred):
                     if float(score) > threshold:
@@ -516,7 +513,6 @@ def main(args):
                     jers_all += [jers]
 
             JER = np.mean(jers_all)
-            # print(f"threshold: {threshold:.2f}, JER: {JER:.1f} %")
             metrics_dict["JER"] = JER
 
         # print metrics

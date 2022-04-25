@@ -1,12 +1,6 @@
 import math
-import numpy as np
 
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torch.distributions.multivariate_normal import MultivariateNormal
-
-empty = torch.tensor([])
 
 
 def mahalanobis_distance(X, Y, M):
@@ -30,8 +24,8 @@ def vb_plda_clustering(
     B,
     W,
     max_classes,
-    X_labeled=empty,
-    labels=empty,
+    X_labeled=torch.tensor([]),
+    labels=torch.tensor([]),
     prob_outlier=0,
     n_iter=20,
     Fa=1.0,
@@ -52,10 +46,6 @@ def vb_plda_clustering(
     background_class = True if prob_outlier > 0 else False
 
     posteriors = torch.rand(n_samples, max_classes).to(device)
-    # posteriors = torch.distributions.gamma.Gamma(torch.tensor([1.0]), torch.tensor([1.0])).sample((n_samples, max_classes)).squeeze(-1)
-    # rnd_vec = torch.randn(max_classes, dim)
-    # from scoring_impl import cosine_similarity
-    # posteriors = torch.exp(cosine_similarity(X, rnd_vec))
 
     if background_class:
         posteriors = torch.cat([posteriors, torch.ones(n_samples, 1).to(device)], dim=1)
@@ -163,11 +153,7 @@ def vb_plda_inference_full(
 
         post[n_labeled:, :] *= Fa / Fb
 
-        # update clusters
-        # for k in range(max_classes):
-        #     p = post[:, k].unsqueeze(1)
-        #     Sigma[k] = torch.linalg.inv(B_inv + torch.sum(p) * W_inv)
-        #     mu[k] = Sigma[k] @ W_inv @ torch.sum(p * X, dim=0)
+        # Initiate clusters
         counts = post[:, :max_classes].sum(0).view(-1, 1, 1)
         Sigma = torch.linalg.inv(B_inv + counts * W_inv)
         mu = (
@@ -223,15 +209,11 @@ def vb_plda_inference_diag(
     log_prior = torch.log(prior)
     if background_class:
         log_post_outlier = (
-            -0.5 * torch.sum(X ** 2 * b_plus_w_inv.view(1, -1), dim=1, keepdim=True)
+            -0.5 * torch.sum(X**2 * b_plus_w_inv.view(1, -1), dim=1, keepdim=True)
             + 0.5 * torch.sum(torch.log(b_plus_w_inv))
             + const
         )
-        # B_plus_W_inv = torch.linalg.inv(torch.eye(dim) + torch.diag(w_diag))
-        # log_post_outlier = -0.5 * torch.sum((X @ B_plus_W_inv) * X, dim=1, keepdim=True) \
-        #                    + 0.5 * torch.logdet(B_plus_W_inv) + const  # outlier
 
-        # print(log_post_outlier)
     for _ in range(n_iter):
 
         post[n_labeled:, :] *= Fa / Fb
@@ -287,11 +269,10 @@ def vb_plda_inference_sph(
     log_prior = torch.log(prior)
     if background_class:
         log_post_outlier = (
-            -0.5 * b_plus_w_inv * torch.sum(X ** 2, dim=1, keepdim=True)
+            -0.5 * b_plus_w_inv * torch.sum(X**2, dim=1, keepdim=True)
             + 0.5 * dim * torch.log(b_plus_w_inv)
             + const
-        )  # outlier
-        # print(log_post_outlier)
+        )
     for _ in range(n_iter):
 
         post[n_labeled:, :] *= Fa / Fb

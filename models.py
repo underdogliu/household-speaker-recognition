@@ -16,9 +16,6 @@ class BaseRecognizer(object):
         super().__init__()
         self.representations = {}
 
-    # def init_classes(self, class2emb):
-    # pass
-
     def get_classes(self):
         return list(self.representations.keys())
 

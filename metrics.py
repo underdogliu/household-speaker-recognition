@@ -14,7 +14,6 @@ def eer(scores, labels, pos_label=1):
 
 def far_at_frr(scores, labels, frr_point=1, pos_label=1):
     far, tpr, thresholds = roc_curve(labels, scores, pos_label=pos_label)
-    # frr = 1 - tpr
     idx = np.searchsorted(tpr, 1 - (frr_point / 100))
     thresh = thresholds[idx]
     far_point = far[idx]

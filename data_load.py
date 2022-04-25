@@ -1,4 +1,3 @@
-import os
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -55,29 +54,13 @@ def load_asvspoof(
             utt, spk = line.strip().split()
             utt2spk[utt] = spk
 
-    # X = []
-    # y = []
-    # for utt in utt_ids_train:
-    #     x = utt2emb_train[utt]
-    #     X += [x]
-    #     y += [utt2spk[utt]]
-    # X = torch.cat(X)
-    # y = torch.tensor(np.unique(y, return_inverse=True)[1])
-    #
-    # # remove zero embeddings
-    # mask = torch.norm(X, dim=1) > 1e-6
-    # X = X[mask]
-    # y = y[mask]
-
     utt2emb = {**utt2emb_train, **utt2emb_enroll, **utt2emb_test}
-
     return utt2emb
 
 
 def load_voxceleb(
     embeddings_name, embeddings_type, embeddings_path, length_normalized=False
 ):
-
     if len(embeddings_type) > 0:
         embeddings_type_path = f"_{embeddings_type}"
     else:
@@ -103,8 +86,6 @@ def load_voxceleb(
     utt2emb_train = {
         get_utt_id(utt): emb_from_npy(x) for (x, utt) in zip(X, utt_ids_train)
     }
-    # utt2spk_train = {utt: get_spk_id(utt) for utt in utt_ids_train}
-
     data = np.load(
         f"{embeddings_path}/emb_vox1_test_{embeddings_name}{embeddings_type_path}.npz"
     )
@@ -113,10 +94,8 @@ def load_voxceleb(
     utt2emb_test = {
         get_utt_id(utt): emb_from_npy(x) for (x, utt) in zip(X, utt_ids_test)
     }
-    # utt2spk_test = {utt: get_spk_id(utt) for utt in utt_ids_test}
 
     utt2emb = {**utt2emb_train, **utt2emb_test}
-    # utt2spk = {**utt2spk_train, **utt2spk_test}
     return utt2emb
 
 
