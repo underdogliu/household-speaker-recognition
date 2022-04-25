@@ -50,6 +50,7 @@ def specify_result_dir(
     results_dir = f"./results/{protocol_name}/{enrollment_type}/{embeddings_name}_{t_now.strftime('%Y-%m-%d')}/{t_now.strftime('%H-%M-%S')}"
     os.makedirs(results_dir, exist_ok=False)
     print("Results location:", results_dir)
+    return results_dir
 
 
 def set_seed(config_common):
