@@ -2,14 +2,13 @@
 
 **WORK IN PROGRESS**
 
+Please contact @sholokovalexey and @underdogliu if having any question.
+
 This is the associated baseline system for our work on Speaker Odyssey, focusing on household speaker recognition. 
 
 Code in this repo is subjected to baseline experiments with limited number of protocols. Therefore, it needs re-factoring and incremental updates as the research proceeds.
 
 ## Usage
-1. How to use the code
-2. How to modify the code (for users, coming soon): initiate functions and classes
-3. De-factorize the main script
 
 ### Pre-requisites
 Python3.8+. We tested our code on python 3.8 and 3.9.
@@ -59,7 +58,3 @@ If you would like to use this repo, please cite our work:
   year={2022}
 }
 ```
-
-## Contact
-
-Please contact @sholokovalexey and @underdogliu if having any question.
