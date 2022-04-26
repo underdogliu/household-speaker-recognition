@@ -41,6 +41,17 @@ def specify_result_dir(
     enrollment_type="active",
     embeddings_name="speechbrain",
 ):
+    """Make result directory and store them.
+
+    Args:
+        protocol_path (_type_): _description_
+        simulation_ids (_type_): _description_
+        enrollment_type (str, optional): _description_. Defaults to "active".
+        embeddings_name (str, optional): _description_. Defaults to "speechbrain".
+
+    Returns:
+        _type_: _description_
+    """
     # specify result directory
     t_now = datetime.now()
     protocol_name = protocol_path.split(os.sep)[-1]
@@ -54,6 +65,11 @@ def specify_result_dir(
 
 
 def set_seed(config_common):
+    """Set seed to avoid randomness
+
+    Args:
+        config_common (str): common config on embeddings and random seeds
+    """
     # set the seed to avoid randomness
     seed = config_common["seed"]
     random.seed(seed)
@@ -65,16 +81,15 @@ def load_embeddings(config_common, config, protocol_name="proto_v5b", device="cp
     """Load the speaker embeddings to train the backend.
 
     Args:
-        config_common (str): common config on embeddings
+        config_common (str): common config on embeddings and random seeds
         config (str): detailed config of embeddings and scoring backend.
         protocol_name (str, optional): name of experimental protocol. Defaults to "proto_v5b".
-        device (str, optional): running device. Defaults to "cpu" or "gpu:0".
+        device (str, optional): running device. Defaults to "cpu" or "cuda:0".
     """
     # load related parameters
     embeddings_path = config_common["embeddings_path"]
-
     embeddings_type = config["embeddings_type"]
-    embeddings_name = config["embeddings_name"]  # ['clova', 'speechbrain', 'xvector']
+    embeddings_name = config["embeddings_name"]
     assert embeddings_name in ["clova", "speechbrain", "xvector"]
 
     recognizer = config["recognizer"]
@@ -122,16 +137,13 @@ def load_embeddings(config_common, config, protocol_name="proto_v5b", device="cp
 
 
 def plda_train_infer(config, X, y, utts_train, device="cpu"):
-    """_summary_
+    """train and do scoring via PLDA
 
     Args:
-        config (_type_): _description_
-        utts_train (_type_): _description_
-        calibrate (bool, optional): _description_. Defaults to False.
-        device (str, optional): _description_. Defaults to "cpu".
-
-    Returns:
-        _type_: _description_
+        config (str): detailed config of embeddings and scoring backend.
+        utts_train (dict): training utterance ID list in {utt: idx}
+        calibrate (bool, optional): do score calibration. Defaults to False.
+        device (str, optional): running device. Defaults to "cpu" or "cuda:0".
     """
     # load related parameters
     embeddings_type = config["embeddings_type"]
@@ -212,21 +224,15 @@ def plda_train_infer(config, X, y, utts_train, device="cpu"):
         similarity_score = similarity_score_raw
         params["calibration"] = {"scale": 1.0, "shift": 0.0}
 
-    # delete the data that is no longer useful
-    del X, y
-
     return similarity_score, params
 
 
 def load_threshold(config, params):
-    """_summary_
+    """load the threshold vakue into parameters list
 
     Args:
-        config (_type_): _description_
-        params (_type_): _description_
-
-    Returns:
-        _type_: _description_
+        config (str): detailed config of embeddings and scoring backend.
+        params (dict): parameter configuration.
     """
     t_min = config["threshold_min"]
     t_max = config["threshold_max"]
@@ -237,12 +243,12 @@ def load_threshold(config, params):
 
 
 def load_trials_convert_params(params, protocol_name="proto_v5b", household_size=7):
-    """_summary_
+    """load the trials and convert parameter from dict to list, for the sake of processing.
 
     Args:
-        params (_type_): _description_
-        protocol_name (_type_): _description_
-        household_size (int, optional): _description_. Defaults to 7.
+        params (dict): parameter configuration.
+        protocol_name (str): name of the protocol, specific to experiments.
+        household_size (int, optional): maximum size (num. members) of a household. Defaults to 7.
     """
     # load trial file list and simulation ID lists
     protocol_path = f"protocols/{protocol_name}"
@@ -289,12 +295,14 @@ def active_enrollment(
     protocol_name="proto_v5b",
     verbose=False,
 ):
+    """Active enrollment runner"""
+
     # load related params
     recognizer = config["recognizer"]
     assert recognizer in _recognizers
     frr_point = config["frr_point"]
 
-    embeddings_name = config["embeddings_name"]  # ['clova', 'speechbrain', 'xvector']
+    embeddings_name = config["embeddings_name"]
     assert embeddings_name in ["clova", "speechbrain", "xvector"]
 
     results_dir = specify_result_dir(
@@ -325,9 +333,10 @@ def active_enrollment(
         ) = ([], [], [])
 
         metrics_dict = {}
+
         # run several simulations and pool all the scores
         n_simulations = int(args.subset * len(simulation_ids))
-        for sim_idx, simulation_id in enumerate(tqdm(simulation_ids[:n_simulations])):
+        for _, simulation_id in enumerate(tqdm(simulation_ids[:n_simulations])):
 
             file_enroll = f"{protocol_path}/{simulation_id}.enroll.txt"
             file_adapt = f"{protocol_path}/{simulation_id}.trn.txt"
@@ -355,7 +364,7 @@ def active_enrollment(
             clf = _recognizers[recognizer](similarity_score, **params)
 
             # create profiles
-            clf.init_classes(spk2emb_enroll)  # 'active enrollment'
+            clf.init_classes(spk2emb_enroll)
 
             # evaluation, before adaptation
             (
@@ -369,7 +378,7 @@ def active_enrollment(
 
             # get the adaptation set
             X_adapt = []
-            n_utts_adapt = int(subset_adapt * len(utts_adapt))  # adaptation set size
+            n_utts_adapt = int(subset_adapt * len(utts_adapt))
             for u in utts_adapt[:n_utts_adapt]:
                 X_adapt += [utt2emb[u]]
             X_adapt = torch.cat(X_adapt)
@@ -493,12 +502,15 @@ def passive_enrollment(
     n_enrolls=777,
     protocol_name="proto_v5b",
     verbose=False,
+    average_per_cluster=True,
 ):
+    """Passive enrollment runner"""
+
     # load related params
     recognizer = config["recognizer"]
     assert recognizer in _recognizers
 
-    embeddings_name = config["embeddings_name"]  # ['clova', 'speechbrain', 'xvector']
+    embeddings_name = config["embeddings_name"]
     assert embeddings_name in ["clova", "speechbrain", "xvector"]
 
     results_dir = specify_result_dir(
@@ -523,28 +535,27 @@ def passive_enrollment(
 
         # run several simulations
         n_simulations = int(args.subset * len(simulation_ids))
-        for sim_idx, simulation_id in enumerate(tqdm(simulation_ids[:n_simulations])):
+        for _, simulation_id in enumerate(tqdm(simulation_ids[:n_simulations])):
 
-            # file_enroll = f"{PROTOCOL_PATH}/{simulation_id}.enroll.txt"
             file_adapt = f"{protocol_path}/{simulation_id}.trn.txt"
             file_trials = f"{protocol_path}/{simulation_id}.trl.txt"
 
-            spk2emb_enroll = {}  # no enrollment data
+            spk2emb_enroll = {}
 
             clf = _recognizers[recognizer](similarity_score, **params)
 
-            # create profiles
-            clf.init_classes(spk2emb_enroll)  # do nothing
+            # create trainer profiles
+            clf.init_classes(spk2emb_enroll)
 
             # get the adaptation set
             utts_adapt = utils_io.read_lines_file(file_adapt, sep=",", merge=True)
             X_adapt = []
-            n_utts_adapt = int(subset_adapt * len(utts_adapt))  # adaptation set size
+            n_utts_adapt = int(subset_adapt * len(utts_adapt))
             for u in utts_adapt[:n_utts_adapt]:
                 X_adapt += [utt2emb[u]]
             X_adapt = torch.cat(X_adapt)
 
-            # update profiles
+            # update the profiles
             clf.fit(X_adapt)
 
             # compute scores and labels
@@ -556,10 +567,6 @@ def passive_enrollment(
 
         # evaluate with threshold
         threshold = params["threshold"]
-        # THIS CAN BE A SEPARATE THRESHOLD,
-        # NOT NECESSARY THE ONE USED AS AN ALGORITHM'S PARAMETER
-
-        AVERAGE_PER_CLUSTER = True  # set to False to average JERs across households
 
         jers_all = []
         for (simulation_id, scores, labels_true, labels_pred) in outputs_list:
@@ -586,9 +593,9 @@ def passive_enrollment(
             jers = metrics.compute_jer(
                 labels_pred_threshold,
                 labels_true,
-                return_individual=AVERAGE_PER_CLUSTER,
+                return_individual=average_per_cluster,
             )
-            if AVERAGE_PER_CLUSTER:
+            if average_per_cluster:
                 jers_all += jers.tolist()
             else:
                 jers_all += [jers]
@@ -630,7 +637,7 @@ def main(args):
     protocol_path = f"protocols/{protocol_name}"
 
     # Set device
-    device = "cuda:0" if torch.cuda.is_available() else "cpu"
+    device = "cuda:0" if torch.cuda.is_available() and args.cuda else "cpu"
 
     # load training data
     X, y, utts_train, utt2emb = load_embeddings(
@@ -650,7 +657,7 @@ def main(args):
         backend_params, protocol_name=protocol_name, household_size=args.household_size
     )
 
-    #enrollment_type = "active" if args.active else "passive"
+    # enrollment_type = "active" if args.active else "passive"
     enrollment_type = config["enrollment_type"]
     enrollment_func = (
         active_enrollment if enrollment_type == "active" else passive_enrollment

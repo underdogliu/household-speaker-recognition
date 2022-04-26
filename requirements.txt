@@ -1,0 +1,9 @@
+-r lint-requirements.txt
+hyperpyyaml>=0.0.1
+numpy>=1.17.0
+packaging
+pre-commit>=2.3.0
+scipy>=1.4.1
+torch>=1.8.0,<=1.10.1
+torchaudio>=0.8.0,<=0.10.1
+tqdm>=4.42.0
