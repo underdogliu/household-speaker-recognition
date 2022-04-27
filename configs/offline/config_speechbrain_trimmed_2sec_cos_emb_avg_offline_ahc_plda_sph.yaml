@@ -25,7 +25,5 @@ thresholds_num: 15
 
 params:
     algorithm: 
-        #- "kmeans" # 0, 15
-        #- "vb_plda_sph" # -5, 20
-        - "ahc_plda_sph" # 200 - 260, score_type must be 'plda_sph' to learn suitable calibration parameters
+        - "ahc_plda_sph"
 

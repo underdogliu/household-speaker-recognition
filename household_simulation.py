@@ -51,8 +51,9 @@ def main(args):
     assert embeddings_name in ["clova", "speechbrain", "xvector"]
     embeddings_type = config["embeddings_type"]
 
-    enrollment_type = config.get("enrollment_type", "active")  # ['active', 'passive']
-    enrollment_type = "active" if args.active else "passive"
+    #enrollment_type = config.get("enrollment_type", "active")  # ['active', 'passive']
+    #enrollment_type = "active" if args.active else "passive"
+    enrollment_type = config["enrollment_type"]
 
     n_enrolls = args.n_enrolls
     hh_size = args.size
