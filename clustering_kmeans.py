@@ -24,7 +24,7 @@ def kmeans_clustering(
     n_labeled = len(labels)
     X = torch.cat([X_labeled, X]) if n_labeled > 0 else X
 
-    n_samples, dim = X.shape
+    _, dim = X.shape
     semi_supervised = True if n_labeled > 0 else False
     means = torch.randn(max_classes, dim).to(X.dtype)
 

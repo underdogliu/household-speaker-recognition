@@ -10,7 +10,7 @@ score_type: 'plda_diag' # ['cos_emb_avg', 'cos_sc_avg', 'plda_sph', 'plda_diag']
 by_the_book: true # plda scoring
 preprocessing_name: "xvector"
 recognizer: 'memory_unsupervised' 
-#sequential_updates: true
+sequential_updates: true
 
 frr_point: 1
 

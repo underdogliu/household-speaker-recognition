@@ -16,7 +16,7 @@ Python3.8+. We tested our code on python 3.8 and 3.9.
 Run `pip install -r requirements.txt` to config the environment. For python virtual environment, please check related instructions in [Virtualenv](https://virtualenv.pypa.io/en/latest/) or [Conda](https://docs.anaconda.com/anaconda/user-guide/getting-started/).
 
 ### Runner
-1. Download the speaker embeddings from [this link]() and store them in `${YOUR_PATH}/embeddings` (we will employ git LFS later).
+1. Download the speaker embeddings from [this link](https://drive.google.com/drive/folders/1eEC0IOV2KJR-7TV2v56o66A5_lazTCnV?usp=sharing) and store them in `${YOUR_PATH}/embeddings` (we will employ git LFS later).
 2. Config the path of embeddings in `config.yaml` to `${YOUR_PATH}/embeddings`.
 3. Run `scripts/run_all.sh` for empirical experiments across all baseline configurations, including active and passive enrollments. There are multiple other scripts for individual experiments. You can have a check on the scripts and related config files in `./configs` for more.
 

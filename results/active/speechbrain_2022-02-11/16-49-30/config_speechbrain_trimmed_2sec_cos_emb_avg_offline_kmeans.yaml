@@ -9,7 +9,7 @@ score_type: 'cos_emb_avg' # ['cos_emb_avg', 'cos_sc_avg', 'plda_sph', 'plda_diag
 by_the_book: true # plda scoring
 preprocessing_name: ""
 recognizer: 'memory_offline'
-#sequential_updates: false
+sequential_updates: false
 
 
 frr_point: 1

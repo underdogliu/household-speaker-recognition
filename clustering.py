@@ -103,7 +103,6 @@ def label_spreading(X, X_labeled, labels):
     X = torch.cat([X_labeled, X]).cpu().numpy()
 
     label_spread = LabelSpreading(kernel="knn")
-    # label_spread = LabelSpreading(kernel="rbf", alpha=0.1, gamma=10)
     label_spread.fit(X, y)
     output_labels = label_spread.transduction_
     return torch.tensor(output_labels[n_labeled:])
