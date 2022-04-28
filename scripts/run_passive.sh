@@ -8,7 +8,7 @@ VERBOSE=0
 # speechbrain
 python3 household_simulation.py --config configs/passive/config_speechbrain_trimmed_2sec_ahc.yaml --debug $DEBUG --verbose $VERBOSE
 python3 household_simulation.py --config configs/passive/config_speechbrain_trimmed_2sec_vb_plda.yaml --debug $DEBUG --verbose $VERBOSE
-python3 household_simulation_mod.py --config configs/passive/config_speechbrain_trimmed_2sec_vb_plda.yaml --debug $DEBUG --verbose $VERBOSE
+python3 household_simulation.py --config configs/passive/config_speechbrain_trimmed_2sec_vb_plda.yaml --debug $DEBUG --verbose $VERBOSE
 
 # clova
 python3 household_simulation.py --config configs/passive/config_clova_2sec_ahc.yaml --debug $DEBUG --verbose $VERBOSE
